@@ -1,8 +1,3 @@
----
-author: "Shaoyi Lu"
-output: html_document
----
-
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE,
                       message=FALSE, warning = FALSE,
@@ -13,50 +8,10 @@ library(lubridate)
 source("../../scripts/viridis.R")
 ```
 
-## Assignment 3
-
-#### Due Friday, February 17 11:59 PM CT
-
-### Preliminaries
-
-Code to read in data and source the *viridis.R* file assumes: (1) that you have the following directories and files, where COURSE is the path to your top course directory (it might be something like "~/Documents/stat240"); (2) that you have set the *hw03* directory to be your working directory; and (3) that you have installed both the **tidyverse** and **viridisLite** packages.
-
-- Directories
-    - COURSE/homework/
-    - COURSE/homework/hw03/
-    - COURSE/data/
-    - COURSE/scripts/
-- Files
-    - COURSE/homework/hw03/hw03.Rmd
-    - COURSE/data/madison-weather-official-1969-2021.csv
-    - COURSE/data/exoplanets_confirmed_2022-09-12.csv
-    - COURSE/scripts/viridis.R
-
-#### Notes
-
-- You will need to install the `viridisLite` package if you have not done so already.
-- Code in the file `viridis.R` changes the default color scheme in `ggplot2` so that:
-    - default colors are easier to perceive by people with a variety of color blindness conditions
-    - when color is used to represent a continuous variable, perception of changes of shade are more even than in the default choice.
-- Replace the text "YOUR NAME HERE" in the YAML section with your name.
-- Edit this file, answer the questions, knit, and submit your solutions by uploading the resulting HTML file to the course Canvas site.  Be sure to review your HTML and ensure that your solutions appear as you expect prior to submitting.
-- Post questions using Discord, visit the Learning Center, or attend office hours if you have questions.
-
-### Aims
-
-- Refine and expand **ggplot2** skills for making plots, including:
-    - changing axis scales
-    - using color and size
-    - making bar plots for categorical data
-    - breaking plots over multiple facets
-- Demonstrate skills from **dplyr** for wrangling and summarizing data
-
-
 ### Problems
 
 The following R chunk reads in the default exoplanet data,
 selects some variables, and changes some variable names.
-*Note: This data set is not the same as what you used in discussion this week. It has already been reduced to a file with one unique exoplanet per row and variables have been selected and renamed.*
 
 ```{r read-planet-data}
 ## Read in the csv file
