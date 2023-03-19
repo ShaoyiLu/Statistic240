@@ -8,11 +8,6 @@ library(lubridate)
 source("../../scripts/viridis.R")
 ```
 
-### Problems
-
-The following R chunk reads in the default exoplanet data,
-selects some variables, and changes some variable names.
-
 ```{r read-planet-data}
 ## Read in the csv file
 planets = read_csv("../../data/exoplanets-clean-through-2022.csv") 
@@ -33,8 +28,6 @@ x=planets %>%
   arrange(mass)
 print(x)
 ```
-
-
 
 
   2. Using the exoplanet data table `planets`:
@@ -77,8 +70,6 @@ ggplot(x, aes(x=year, y=min, size=n)) +
 Answer: It looks like that the mass of the discovered planet gradually decreases over time.
 
 
-
-
   3. Using the `planets` data set created at the beginning of the assignment
 *(not the reduced data set from the previous problem)*,
 determine which methods have been used to discover fewer than 50 planets each. For use in the remaining exoplanet problems,
@@ -116,8 +107,6 @@ head(z, n=10)
 
 
 
-
-
   4. Using this data summary, create and display a bar plot with the year on the x axis and the proportion of discovered planets on the y axis.  Let each year have a single bar that extends from a proportion of 0 to 1, with sections of each bar filled with a color by method
 Add appropriate axis labels and plot title.
 
@@ -132,10 +121,6 @@ ggplot(z, aes(x=year, y=proportion)) +
 Which method was most successful with the earliest discoveries of exoplanets, and which method has supplanted that method in relative popularity in recent years?
 
 Answer: Radial Velocity
-
-
-
-
 
 
 
@@ -163,10 +148,6 @@ ggplot(new_graph, aes(x=year, y=n)) +
   xlab("Years") + ylab("Discovered planets") + 
   ggtitle("Methods to discovery new planets every year")
 ```
-
-
-
-
 
 
 ```{r, include = FALSE}
@@ -220,7 +201,6 @@ Answer: 7 months
 
 
 
-
 - **6d**. The ten years with the highest average temperature on record since 1869. How many of these years have occurred since 2000?
 
 ```{r}
@@ -235,9 +215,6 @@ official %>%
     year >= 2000 ~ "At current century",
     year < 2000 ~ "At last century"))
 ```
-
-
-
 
 
   7. The mean daily average temperature in Madison in January, 2023 was 27.02 degrees Fahrenheit.
@@ -281,6 +258,3 @@ ggplot(x, aes(x=year, y=tavg)) +
   xlab("Years") + ylab("Average") + 
   ggtitle("The average of temperature in each year")
 ```
-
-
-
