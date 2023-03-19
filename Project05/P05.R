@@ -1,8 +1,3 @@
----
-author: "Shaoyi Lu"
-output: html_document
----
-
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE, message = FALSE,
                       warning = FALSE, error = TRUE,
@@ -11,33 +6,6 @@ library(tidyverse)
 library(lubridate)
 source("../../scripts/viridis.R")
 ```
-
-## Assignment 5
-
-#### Due Friday, March 3, 11:59 PM CT
-
-### Preliminaries
-
-- Directories
-    - COURSE/homework/
-    - COURSE/homework/hw05/
-    - COURSE/data/
-    - COURSE/scripts/
-- Files
-  - COURSE/homework/hw05/hw05.Rmd
-  - COURSE/data/obesity.csv
-  - COURSE/data/education.csv
-  - COURSE/scripts/viridis.R
-
-### Aims
-
-- Practice joining data sets
-- Practice reshaping data with `pivot_longer()` and `pivot_wider()`
-- Review data visualization and transformations
-
-
-
-
 
 ### Obesity and Education Background
 
@@ -115,7 +83,6 @@ ggplot(education_orig, aes(x=pct_f_bach, y=pct_m_bach)) +
 
 > I think it may be due to the small number of these samples collected.
   
-
 
 
 
@@ -284,5 +251,3 @@ education_8 = inner_join(adult_obesity_sum, education_3a, by=c("zip", "sex")) %>
 ggplot(education_8, aes(x=pct_bachelors, y=pct_obese, color=sex)) + 
   geom_point() + geom_smooth(se=TRUE) + labs(x="Obesity Percentage", y="Bachelors Percentage", title="Relationship between the Percentage of Obesity and Bachelors") + scale_color_manual(values=c("firebrick1", "darkslategrey"))
 ```
-
-
