@@ -75,7 +75,6 @@ Your sentence will use a number instead of X.
 Answer is 62750
 
 
-
   5. Write a short sentence to explain what the symbol `^` does in the following code chunk.
   
 ```{r}
@@ -105,7 +104,6 @@ max(x)
 ```
 
 
-
   7. Calculate the median of these values. Write a brief sentence to explain why this calculated value is the median.
 *(The median is the "middle value" in a sorted list of numbers. What does "middle" mean when there are an even number of values in the list, at least as encoded in the function `median()`?)*
 
@@ -132,4 +130,3 @@ $$
 ```{r}
 sum((x-mean(x))^2)
 ```
-
