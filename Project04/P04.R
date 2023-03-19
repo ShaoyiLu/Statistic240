@@ -112,9 +112,6 @@ temp1 %>%
 
 
 
-
-
-
   3. Modify the `ord` data set by:
 
 - Adding a variable named `time_of_day` which categorizes the `hour` variable in the following way:
