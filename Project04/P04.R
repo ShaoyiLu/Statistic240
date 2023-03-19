@@ -1,8 +1,3 @@
----
-author: "Shaoyi Lu"
-output: html_document
----
-
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE,
                       error = TRUE, fig.height = 3)
@@ -10,46 +5,6 @@ library(tidyverse)
 library(lubridate)
 source("../../scripts/viridis.R")
 ```
-
-## Homework Assignment 4
-
-#### Due Friday, February 24 at 11:59 PM CT
-
-### Preliminaries
-
-- Directories
-    - COURSE/homework/
-    - COURSE/homework/hw04/
-    - COURSE/data/
-    - COURSE/scripts/
-- Files
-  - COURSE/homework/hw04/hw04.Rmd
-  - COURSE/data/ORD-2017.csv  
-  - COURSE/data/ORD-2018.csv  
-  - COURSE/data/ORD-2019.csv  
-  - COURSE/data/ORD-2020.csv  
-  - COURSE/data/ORD-2021.csv 
-  - COURSE/scripts/viridis.R
-
-### Aims
-
-- Practice data visualization using ggplot2  
-- Practice data wrangling with dplyr   
-- Practice reading in data and working with dates  
-- Explore additional airport waiting time data
-
-
-
-### Problems
-
-This assignment involves five data sets involving international flights arriving to Chicago's O'Hare airport from January 1, 2017 through December 31, 2021
-with one separate file for each year.
-Each file has been cleaned from the original HTML.
-
-Each data set is in a separate CSV file:
-`ORD-2017.csv`, `ORD-2018.csv`, `ORD-2019.csv`, `ORD-2020.csv`, `ORD-2021.csv`.
-
-This code chunk reads in these five data sets and combines them into a single data set.
 
 ```{r}
 ord = map_dfr(2017:2021, ~{
@@ -93,8 +48,6 @@ x
 dim(x)
 ```
 
-
-
   2. Are there any dates in the range from January 1, 2017 through December 31, 2021 that are missing? If so, which ones?
 
 ```{r}
@@ -108,9 +61,6 @@ temp2 = x %>%
 temp1 %>% 
   anti_join(temp2)
 ```
-
-
-
 
   3. Modify the `ord` data set by:
 
@@ -177,8 +127,6 @@ z
 ```
 
 
-
-
   4. Use a bar graph to display the total number of flights in each time period as calculated in the previous problem. There should be six categories of time period from "overnight" to "late evening".
 Add a title and meaningful axis labels.  
 
@@ -189,9 +137,6 @@ ggplot(z, aes(x = time_of_day, y = total_flights)) +
   ylab("Total Flights") +
   ggtitle("Chicago Flights from 2017 to 2021")
 ```
-
-
-
 
 
   5. Create a data summary table with the average daily number of passengers by month and year.
@@ -221,8 +166,6 @@ ggplot(prob5, aes(x = month, y = avg_passengers)) +
 ```
 
 
-
-
   6. What striking feature is apparent in this graph?
 What explains this feature of the data?
 
@@ -247,8 +190,6 @@ w = y %>%
   arrange(desc(avg_passengers))
 w
 ```
-
-
 
 
 
