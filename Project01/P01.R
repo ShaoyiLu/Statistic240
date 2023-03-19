@@ -1,7 +1,3 @@
----
-output: html_document
----
-
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE, message = FALSE, error = TRUE)
 ```
@@ -11,10 +7,7 @@ knitr::opts_chunk$set(echo = TRUE, message = FALSE, error = TRUE)
   1. This problem checks if you can execute a base R command by generating a vector of 50 random integers from something called a Poisson distribution.
 Change the argument in the chunk header from `eval = FALSE` to `eval = TRUE` and evaluate the chunk.
 
-What is the 30th value in the vector?
-
-Note that when a vector is written out in the output, each line is preceded by a label which indicates the index of the first value on that line. So `[1]` on the first line means that line begins with the first element.
-A line of output which begins with `[10]` would start with the 10th element of the vector.
+Find what is the 30th value in the vector:
 
 ```{r, eval = TRUE}
 ## set a random seed so all answers are the same
@@ -54,7 +47,6 @@ Answer is 76
    a2 <- seq(1, 8)
    a1
    a2
-
 ```
   
 
