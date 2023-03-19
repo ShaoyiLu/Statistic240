@@ -1,9 +1,3 @@
----
-author: "Shaoyi Lu"
-title: "Assignment 2"
-output: html_document
----
-
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE, message=FALSE, error = TRUE,
                       fig.height = 4)
@@ -11,72 +5,6 @@ library(tidyverse)
 library(lubridate)
 library(viridisLite)
 ```
-
-### Due Friday, February 10, 11:59 PM CT
-
-### Aims
-
-- Read ggplot2 code examples for making graphics and describe what different commands do;
-- Practice using `ggplot2` commands on new data to mimic examples from lecture.
-
-### Notes
-
-- This file assumes that your course home directory contains a folder named `data`, a folder named `homework`, and a folder within `homework` named `hw02`, and that you have installed the **tidyverse** package.
-    - If you did not name your directories this way, you might need to change some names to match your naming scheme (see Preliminaries section below for more on this)
-
-### Data
-
-##### Lake Monona
-
-Data in *lake-monona-winters-2022.csv* is similar to that in the Lake Mendota data set from lecture,
-but contains freeze durations in Lake Monona, **and not from Lake Mendota**.
-There is one row from each winter from 1855--56 through 2021--22.
-
-Variables in the data set are:
-
-- winter --- a string such as "1855-56" which specifies the winter
-- year1 --- the first year of the winter
-- periods --- the number of periods of consecutive days where the surface of Lake Monona was closed by 50% or more of ice.
-- duration --- the total number of days during the winter that 50% or more of the lake surface is frozen (closed by ice)
-- first_freeze --- the first date the lake is closed during the winter
-- last_thaw --- the date of the last thaw during the winter
-- decade --- the decade of the first winter
-- period50 --- a 50-year period of time
-- ff_x --- the number of days after June 30 of the first freeze
-- ff_cat --- a categorical variable of the half-month of the first freeze
-
-*Note: lecture notes had a different name than `ff_x` for counting the days after June 30.*
-
-### Preliminaries
-
-- If you do not already have them,
-create the following sub-directories in your course directory.
-    - `data`
-    - `homework`
-    - `homework/hw02` --- this means create `hw02` inside of `homework`
-    
-If you have a different name scheme that you do not want to change (such as using capital letters or different names), this is okay, but you will need to change the code in the chunk below to match your directory names.
-
-- Directories
-    - COURSE/homework/
-    - COURSE/homework/hw02/
-    - COURSE/data/
-- Files  
-    - COURSE/homework/hw02/hw02.Rmd
-    - COURSE/data/lake-monona-winters-2022.csv
-
-- Download the file `lake-monona-winters-2022.csv` and place it in the `data` directory.
-- Download the file `hw02.Rmd` and place into the `homework/hw02` directory.
-- Navigate to the `homework/hw02` directory and set it to be your working directory.
-
-- Open the `hw02.Rmd` document and answer the questions.  You will need to complete chunks to solve the problems.  Some problems require written responses in addition to code.
-
-### Submission
-
-Once you have completed all of the questions, knit the R Markdown document to create an HTML file.  To submit this assignment, go to our Canvas site and select "Assignments" on the left panel, and upload both the edited .Rmd and HTML files.
-- Execute the code in the chunk below to read in the data.
-    - If there is an error, check to see if there is a `data` directory two directories up that contains the data file.
-- Post questions on Discord, visit the Learning Center, or attend office hours if you have questions.
 
 ```{r read-data, echo = FALSE}
 ## The echo = FALSE argument to this chunk
@@ -89,7 +17,6 @@ Once you have completed all of the questions, knit the R Markdown document to cr
 monona = read_csv("../../data/lake-monona-winters-2022.csv") %>% 
   mutate(ff_cat = reorder(ff_cat, ff_x))
 ```
-
 
 ### Problems
 
@@ -130,7 +57,6 @@ ggplot(monona, aes(x=duration)) +
   ylab("Total") + 
   ggtitle("The Days of Monona Lake with Ice")
 ```
-
 
 
 
