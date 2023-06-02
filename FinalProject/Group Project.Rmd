@@ -1,0 +1,364 @@
+---
+title: "Analyzing Crime Patterns and Trends in Los Angeles from 2020 to 2022"
+author: "Shaoyi Lu"
+date: "2023-04-16"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, message=FALSE, warning = FALSE,
+                      error = TRUE, fig.height = 4)
+```
+```{r, include=FALSE}
+library(tidyverse)
+library(kableExtra)
+library(lubridate)
+library(broman)
+library(readr)
+library(broom)
+library(vroom)
+library(dplyr)
+library(ggplot2)
+library(stringr)
+```
+
+
+## Introduction:
+
+Crime is a persistent issue in many urban areas around the world, and the city of Los Angeles is no exception. The Crime Data from 2020 to Present dataset, obtained from the Los Angeles Open Data Portal, provides a detailed record of reported crimes in the city over the past few years. The dataset contains information on the type of crime, location, and time of occurrence, among other variables.
+
+In this project, we will analyze the Crime Data from 2020 to Present dataset to better understand the patterns and trends of crime in Los Angeles. Specifically, we aim to answer questions such as:
+
+- Are certain areas of the city more prone to crime than others? Are there certain areas that are more prone to certain types of crime than others?
+- Is the age distribution of victims of different genders in Los Angeles related to a normal distribution? What does this mean?
+- How to use different gender t-test models to test whether the difference between male and female crime rates is significant, including making assumptions, building models, calculating test statistics and p-values, and drawing conclusions through actual data analysis?
+
+By examining this data, we hope to gain insights that can inform policy decisions and help to make the city safer for its residents. The thesis of our report is that by analyzing the Crime Data from 2020 to Present dataset, we can identify patterns and trends in crime in Los Angeles that can inform policy decisions aimed at reducing crime rates and improving public safety.
+
+
+## Background:
+
+The data set we will be analyzing is the Crime Data from 2020 to Present in Los Angeles, California. This data was collected and provided by the Los Angeles Police Department and includes information about crimes reported in the city. The variables in this data set include the type of crime, date and time of occurrence, location of the crime, and means of crime.
+
+What we want to find:
+Our goal is to gain insights into the crime patterns in Los Angeles to assist law enforcement agencies in crime prevention and to aid individuals in making informed decisions about their safety. We will analyze the data based on different variables such as crime type, location, and time of occurrence to identify trends and patterns.
+
+Data citation:
+“Crime Data from 2020 to Present” Los Angeles Police Department: <https://data.lacity.org/Public-Safety/Crime-Data-from-2020-to-Present/2nrs-mtv8>.
+
+```{r, echo=FALSE}
+crime = read_csv("../data/Crime_Data_from_2020_Present_Final.csv")
+```
+
+## Analysis:
+
+- ### Summary of the number of crimes in 2020 - 2022
+
+```{r, echo=FALSE}
+crime_count_by_year = crime %>%
+  filter(year(DATE_OCC) %in% c(2020, 2021, 2022)) %>%
+  group_by(Year = year(DATE_OCC)) %>%
+  summarize(Num_Crimes = n())
+
+ggplot(crime_count_by_year, aes(x = Year, y = Num_Crimes, fill = factor(Year))) +
+  geom_col() +
+  geom_text(aes(label = Num_Crimes), vjust = -0.5, size = 5) +
+  xlab("Year") + ylab("Number of Crimes") +
+  ggtitle("Number of Crimes by Year") +
+  theme_minimal()
+```
+
+> On the whole, the number of crimes in Los Angeles is gradually increasing every year.
+
+
+- ### The crime rate of each region in Los Angeles
+
+```{r, echo=FALSE}
+crime_by_area = crime %>%
+  group_by(`AREA NAME`) %>%
+  summarize(total_crime = n()) %>%
+  mutate(crime_rate = total_crime / sum(total_crime)*100)
+
+ggplot(crime_by_area, aes(x = `AREA NAME`, y = total_crime)) +
+  geom_col(fill = "springgreen4", color="paleturquoise1") +
+  xlab("Area") +
+  ylab("Number of crimes") +
+  ggtitle("The number of crimes in each area") + 
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+```
+
+> According to the histogram, this allows us to easily compare the crime rate in different areas of Los Angeles. Among them, Central has the highest crime rate, with a total of 46,434 cases; Foothill has the lowest crime rate, with a total of 23,566 cases, which is only half of Central.
+
+
+- ### Trends in number of crimes monthly from 2020 to 2022
+
+```{r, echo=FALSE}
+crime_count_by_year_month = crime %>%
+  filter(year(DATE_OCC) %in% c(2020, 2021, 2022)) %>%
+  group_by(Year = year(DATE_OCC), Month = month(DATE_OCC)) %>%
+  summarize(Num_Crimes = n())
+
+ggplot(crime_count_by_year_month, aes(x = Month, y = Num_Crimes, group = Year, color = factor(Year))) +
+  geom_line() +
+  geom_point() +
+  xlab("Month") + ylab("Number of Crimes") +
+  ggtitle("Number of Crimes by Year and Month") +
+  scale_x_continuous(breaks = 1:12, labels = month.abb) +
+  theme_minimal()
+```
+
+> According to the comparison of data in different years in this line chart, we can find that the crime rate in 2022 is significantly higher than that in the previous two years.
+
+> Comparing these line charts separately, we can see the overall trend of crime rate changes from 2020 to 2022
+
+```{r, echo=FALSE}
+ggplot(crime_count_by_year_month, aes(x = Month, y = Num_Crimes, group = Year, color = factor(Year))) +
+  geom_smooth(linetype = "dashed", se=FALSE) +
+  geom_line() +
+  geom_point() +
+  xlab("Month") + ylab("Number of Crimes") +
+  ggtitle("Number of Crimes by Year and Month") +
+  scale_x_continuous(breaks = 1:12, labels = month.abb) +
+  facet_wrap(~ Year, ncol = 1) +
+  theme_minimal()
+```
+
+> According to the change trend of the data of these three years, we can see that the crime rate in Los Angeles will drop significantly from 2020 to 2021, and the crime rate will gradually increase from 2021 to 2022.
+
+
+- ### Average crime rate in Los Angeles at different times of the day
+
+```{r, echo=FALSE}
+crime = crime %>%
+  mutate(hour = as.numeric(format(as.POSIXct(`TIME OCC-1`, format="%H:%M:%S"), format="%H")))
+
+crime_by_hour = crime %>%
+  group_by(hour) %>%
+  summarize(total_crime = n()) %>%
+  mutate(crime_rate = total_crime / sum(total_crime) * 100)
+
+ggplot(crime_by_hour, aes(x = hour, y = crime_rate)) +
+  geom_point(size = 5, color = "orange3") +
+  geom_smooth(color="skyblue2", linetype="dashed") + 
+  labs(x = "Hour of day", y = "Crime rate (%)", title = "Crime rate by hour of day") +
+  theme_bw()
+```
+
+> As we can see from this graph, the majority of crime in Los Angeles occurs between 5 and 6 p.m. every day. In contrast, 5 a.m. is the time of day with the least crime in Los Angeles.
+
+
+- ### The type of crime most likely to occur in each region
+
+```{r, echo=FALSE}
+crime_by_area_type = crime %>%
+  group_by(`AREA NAME`, `Crm Cd Desc`) %>%
+  summarize(count=n()) %>%
+  mutate(pct=count/sum(count)*100) %>%
+  arrange(`AREA NAME`, desc(pct)) %>%
+  group_by(`AREA NAME`) %>%
+  slice_head(n=1)
+
+ggplot(crime_by_area_type, aes(x=`AREA NAME`, y=pct, fill=`Crm Cd Desc`)) +
+  geom_bar(stat = "identity") +
+  labs(title = "Crime types by area",
+       x = "Area",
+       y = "Percentage",
+       fill = "Crime type") +
+  scale_fill_brewer(type="qual", palette="Set3") +
+  theme_bw() + 
+  theme(axis.text.x = element_text(angle = 45, vjust = 0.7, hjust=0.5)) +
+  theme(axis.text.y = element_text(angle = 45, vjust = 0.3, hjust=0.3))
+```
+
+> Through further analysis, we can see from the histogram that the crimes that frequently occur in most areas of Los Angeles are vehicle-stolen, and in most areas it has reached about 10% to 15%. This may be because, Cars are valuable and can be difficult to track down after being stolen.
+However, the Central area with the highest crime rate is the most frequent occurrence of burglary from vehicle, reaching 13.9%. And it is because there are too many trivial cases that are difficult to detect but easy for criminals to do, which leads to the highest crime rate in Central.
+
+
+- ### The race most likely to be targeted and victimized by suspects in each area of Los Angeles
+
+```{r, echo=FALSE}
+crime_subset = crime %>%
+  select(`AREA NAME`, `Vict Descent`)
+
+crime_summary = crime_subset %>%
+  group_by(`AREA NAME`, `Vict Descent`) %>%
+  summarize(count = n()) %>%
+  mutate(percentage = count/sum(count))
+
+crime_freq = crime_summary %>%
+  group_by(`AREA NAME`) %>%
+  summarize(crime_freq = sum(count)/sum(crime_summary$count))
+
+ggplot(crime_summary, aes(x = `AREA NAME`, y = percentage, fill = `Vict Descent`)) +
+  geom_bar(stat = "identity", position = "stack") +
+  coord_flip() +
+  labs(title = "Crime rate by victim descent and area",
+       y = "Percentage",
+       x = "Area name",
+       fill = "Victim descent") +
+  scale_fill_manual(values = c("A" = "springgreen", "B" = "black", "C" = "darkorange", "D" = "purple", "F" = "yellow", "G" = "green", "H" = "red", "I" = "cyan", "J" = "hotpink", "K" = "steelblue", "L" = "darkgoldenrod", "O" = "yellowgreen", "P" = "pink", "S" = "skyblue", "U" = "lightsalmon", "V" = "gold", "W" = "white", "X" = "slateblue4", "Z" = "limegreen"), labels = c("Other Asian", "Black", "Chinese", "Cambodian", "Filipino", "Guamanian", "Hispanic/Latin/Mexican", "American Indian/Alaskan Native", "Japanese", "Korean", "Laotian", "Other", "Pacific Islander", "Samoan", "Hawaiian", "Vietnamese", "White", "Unknown", "Asian Indian")) +
+  theme(legend.key.height = unit(0.5, "cm"))
+```
+
+> This graph shows how crime rates in different regions vary with the ethnicity of the victims. Each bar graph represents a region, and each bar graph is divided into differently colored stacks, each stack representing the proportion of a certain ethnic group of victims in that region. From this graph, we can see that Hispanics account for the largest proportion of victims, and almost every region has a significant number of Hispanic victims.
+
+> Through this graph, we can also analyze which areas the common races other than the minorities and the unknown mainly live in. For example, in West LA, nearly half of the victims were white, and there were very few Hispanic and black victims in this area, indicating that most of the residents in this area were white; in contrast, the white victims on 77th Street were even Less than 5% of the area, and the majority of victims in this area are blacks, indicating that this area is the preferred place for people of this race to live in Los Angeles.
+
+- ### Number of male and female victims by area of Los Angeles
+
+```{r, echo=FALSE}
+crime_by_city_gender = crime %>%
+  filter(!is.na(`Vict Sex`) & `Vict Sex` != "X" & `Vict Sex` != "H") %>% 
+  group_by(`AREA NAME`, `Vict Sex`) %>%
+  summarize(total_victims = n())
+
+ggplot(crime_by_city_gender, aes(x=`AREA NAME`, y=total_victims, fill=`Vict Sex`)) + 
+  geom_col(position="dodge") + 
+  labs(title="Number of victims per sex in each region", x="Region", y="Number of Victim", fill="Sex") + 
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+crime_clean = crime %>% 
+  filter(!is.na(`Vict Sex`) & `Vict Sex` != "X" & `Vict Sex` != "H") %>% 
+  mutate(`Vict Sex` = ifelse(`Vict Sex` == "F", 1, 0))
+
+crime_sex_ratio = crime_clean %>%
+  filter(!`Vict Descent` %in% c("H", "X", "")) %>% 
+  summarize(vict_sex_ratio = sum(`Vict Sex`) / n())
+
+cat("The proportion of female among the overall victims is approximately ", crime_sex_ratio$vict_sex_ratio, "\n")
+cat("The proportion of male among the overall victims is approximately ", 1 - crime_sex_ratio$vict_sex_ratio, "\n")
+```
+> It can be seen that male in Los Angeles are more likely to be the target of suspects and become victims, and they are about 10% more likely than female.
+
+
+- ### Differences in Crime Rates between Male and Female Victims by Region: Hypothesis Testing using Two-Sample t-Test
+
+> [hypothesis]
+
+$H_0: \mu_{\text{Male}} = \mu_{\text{Female}}$
+
+$H_1: \mu_{\text{Male}} \neq \mu_{\text{Female}}$
+
+Among them, $\mu_{\text{Male}}$ and $\mu_{\text{Female}}$ represent the overall average of male and female crime rates, respectively.
+
+> [model]
+
+We use a two-sample (male and female) $t-test$ model to test the above hypothesis. Assuming equal population variances, the model is:
+
+$t = \frac{\bar{x}{\text{Male}} - \bar{x}{\text{Female}}}{s_p \sqrt{\frac{1}{n_{\text{Male} }}+\frac{1}{n_{\text{Female}}}}}$
+
+Among them, $\bar{x}{\text{Male}}$ and $\bar{x}{\text{Female}}$ represent the sample mean values of male and female respectively, and $s_p$ represents the pooling standard of the two samples Poor, $n_{\text{Male}}$ and $n_{\text{Female}}$ represent the sample sizes of males and females, respectively.
+
+> [test statistic]
+
+The test statistic for the two-sample t-test is:
+
+$t = \frac{\bar{x}{male} - \bar{x}{female}}{\sqrt{\frac{s^2_{male}}{n_{male}} + \frac{s^2_{female}}{n_{female}}}}$
+
+where $\bar{x}{male}$ and $\bar{x}{female}$ are the sample means for male and female crime rates, $s^2_{male}$ and $s^2_{female}$ are the sample variances for male and female crime rates, and $n_{male}$ and $n_{female}$ are the sample sizes for male and female
+
+> [p value]
+
+The p-value is the probability of obtaining a test statistic as extreme as the one observed, assuming that the null hypothesis is true. For a two-tailed test, the p-value is calculated as:
+
+$p = 2 \times P(t \leq -|t_{obs}|)$
+
+where $t_{obs}$ is the observed value of the test statistic.
+
+```{r, echo=FALSE}
+crime_clean = crime %>%
+  filter(!is.na(`Vict Sex`) & `Vict Sex` %in% c("M", "F")) %>% 
+  mutate(`Vict Sex` = ifelse(`Vict Sex` == "F", 1, 0)) %>% 
+  group_by(`AREA NAME`, `Vict Sex`) %>%
+  summarize(crime_rate = n() / n_distinct(DATE_OCC)) %>% 
+  pivot_wider(names_from = `Vict Sex`, values_from = crime_rate) %>% 
+  filter(!is.na(F) & !is.na(`0`))
+
+male_crime_rate = crime_clean$`0`
+female_crime_rate = crime_clean$`1`
+n = nrow(crime_clean)
+sd_diff = sqrt((var(male_crime_rate) + var(female_crime_rate))/n)
+
+# z-score
+z_score = abs(mean(male_crime_rate) - mean(female_crime_rate)) / sd_diff
+
+# p-value
+p_value = 2 * pnorm(-abs(z_score))
+
+cat(sprintf("Z-score: %.2f\n", z_score))
+cat(sprintf("P-value: %.5f\n", p_value))
+
+ggplot(crime_clean, aes(x = `AREA NAME`, y = female_crime_rate - male_crime_rate)) +
+  geom_col(fill = "grey", color="black", width = 1) +
+  labs(title = "Difference in Crime Rates between Male and Female Victims by Region",
+       x = "Region",
+       y = "Female Crime Rate - Male Crime Rate",
+       fill = "") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+```
+
+> [conclusion]
+
+Based on analysis, it tested the null hypothesis that the expected value of your data is equal to some specified value. Z-score is 1.67, which means that your sample mean is 1.67 standard deviations away from the population mean. The corresponding two-tailed p-value of 0.09409 suggests that there is a 9.4% chance of obtaining a sample mean, assuming the null hypothesis is true.
+
+At a significance level of α=0.05, the p-value is greater than the significance level, so it fail to reject the null hypothesis. Therefore, we do not have sufficient evidence to conclude that the expected value of that data is different from the specified value.
+
+This bar graph shows the difference between the probability of being a victim for women and the probability of being a victim for men in different regions. If the bar extends downward, it means that men are more likely to be victimized than women in that area, and if the bar extends upward, it means that women are more likely to be victimized than men. From this graph, we can see that in most areas of Los Angeles, men are more likely to be the targets of criminals, that is, victims, than women.
+
+
+- ### Mean and standard deviation of the number of crimes per month in each area of Los Angeles from 2020 to 2022
+
+```{r, echo=FALSE}
+mean_crime_count = mean(crime_count_by_year_month$Num_Crimes)
+sd_crime_count = sd(crime_count_by_year_month$Num_Crimes)
+
+lower_bound = mean_crime_count - sd_crime_count
+upper_bound = mean_crime_count + sd_crime_count
+prob_between_bounds = pnorm(upper_bound, mean = mean_crime_count, sd = sd_crime_count) - pnorm(lower_bound, mean = mean_crime_count, sd = sd_crime_count)
+
+ggplot(data = data.frame(x = c(mean_crime_count - 3*sd_crime_count, mean_crime_count + 3*sd_crime_count)), aes(x)) +
+  stat_function(fun = function(x) dnorm(x, mean = mean_crime_count, sd = sd_crime_count), geom = "line", color = "blue") +
+  labs(title = "Probability Distribution of Monthly Crime Count",
+       subtitle = paste("Assuming Normal Distribution with Mean and SD from 2020-2022 Data", "\n", paste0("P(", round(lower_bound, 2), " < X <", round(upper_bound, 2), ") = ", round(prob_between_bounds, 5))),
+       y = "Probability Density", x = "Number of Crimes") +
+  geom_vline(xintercept = lower_bound, linetype = "dashed", color = "red") +
+  geom_vline(xintercept = upper_bound, linetype = "dashed", color = "red") +
+  geom_vline(xintercept = mean_crime_count, color = "skyblue4", linetype = "dashed") +
+  geom_hline(yintercept = 0, color = "black") +
+  scale_y_continuous(labels = function(x) paste0(x*100))
+```
+
+> This code is based on the estimation of the average and standard deviation of the monthly crime data in the Los Angeles area from 2020 to 2022, and establishes a probability distribution model that assumes a normal distribution to describe the probability distribution of the monthly crime data in the Los Angeles area. The probability distribution curve is drawn in the code, and the average value, the interval of the average plus or minus one standard deviation, and the probability density value of the interval are marked. This code can be used to help predict the possible distribution of future monthly crime numbers in the Los Angeles area and provide some statistical basis.
+
+
+- ### Age Distribution of Female and Male Victims of Crime in Los Angeles.
+
+```{r, echo=FALSE}
+female_victims = crime %>%
+  filter(`Vict Sex` == "F")
+
+avg_age = mean(female_victims$`Vict Age`)
+
+ggplot(female_victims, aes(x = `Vict Age`)) +
+  geom_histogram(aes(y = stat(density)), bins = 20, color = "black", fill = "blue", alpha = 0.5) +
+  stat_function(fun = dnorm, args = list(mean = avg_age, sd = sd(female_victims$`Vict Age`)), color = "red", size = 1.5) +
+  ggtitle(paste0("Normal Distribution of Female Victims' Age\nMean Age: ", round(avg_age, 1))) + xlab("Victim Age") + ylab("Density")
+
+male_victims = crime %>%
+  filter(`Vict Sex` == "M")
+
+avg_age = mean(male_victims$`Vict Age`)
+
+ggplot(male_victims, aes(x = `Vict Age`)) +
+  geom_histogram(aes(y = stat(density)), bins = 20, color = "black", fill = "blue", alpha = 0.5) +
+  stat_function(fun = dnorm, args = list(mean = avg_age, sd = sd(female_victims$`Vict Age`)), color = "red", size = 1.5) +
+  ggtitle(paste0("Normal Distribution of Male Victims' Age\nMean Age: ", round(avg_age, 1))) + xlab("Victim Age") + ylab("Density")
+```
+
+> According to this result, we can see the average age at which women are most likely to become victims is 38.2 and that of men is 37.5. The age distributions for both female and male victims were close to a normal distribution, meaning that the largest number were around the mean age and fewer and fewer were on either side of the mean. Additionally, the graphs show that the majority of victims are between the ages of 30 and 50
+
+## Discussion:
+
+- This project is about crime information from 2020 to 2022 in all 21 different boroughs of Los Angeles. We hope that by collating and summarizing Crime data, we can better classify the characteristics of crime in Los Angeles, and find ways to reduce the occurrence of crime in this urban area. We will collect data such as time of crime, location of crime, type of crime, gender of the victim, age of the victim, race of the victim, neighborhood of the crime, and the murder weapon, etc., and through comparative analysis of different data, we can find out what kind of crime the criminal prefers to choose. How and when to target what kind of group to commit what kind of crime, to carry out stronger police deployment and strengthen vigilance in this regard. After sorting out the reviews, we found that the crime rate in the Central area is the highest in Los Angeles, where burglary from vehicle occurs the most, and vehicle-stolen is the most frequent case in the entire Los Angeles. Therefore, since most of the cases are related to cars, Los Angeles needs more surveillance and better management of parking lots to reduce this phenomenon. But the reason for this, in addition to insufficient regulation, is largely because car-related theft or theft is one of the easiest ways for criminals to obtain money.
+
+- When doing analysis, it is usually necessary to identify some questions and conduct data analysis to answer these questions. This project is about the difference between crime rates for male and female victims. The purpose of the project is to test a hypothesis by using a two-sample t-test to determine whether there is a significant difference in crime rates between male and female victims. In the project, the assumption was first established whether the average crime rate for male and female victims was equal. Next, the model used to test the hypothesis is a two-sample t-test. After calculating the t-value, it is explained how to calculate the p-value and draw conclusions. The analysis showed that, in most of the Los Angeles area, men were more likely to be targeted by crime—that is, to be victims—than women. At the 5% significance level, failure to reject the null hypothesis indicates that there is insufficient evidence to support the hypothesis that there is a significant difference between crime rates for male and female victims. Overall, this project provides useful information on differences in crime rates for male and female victims, tested using statistical methods. The results showed that men were more likely to be targeted by crime than women in the Los Angeles area. These findings can provide reference for formulating relevant policies.
